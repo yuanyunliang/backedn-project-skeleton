@@ -1,0 +1,1 @@
+这是一个使用springboot3开发的后端管理项目的骨架，包含登陆、注册、token认证处理、跨域处理、mybatisX自动生成代码、还有初步的filter和interceptor
