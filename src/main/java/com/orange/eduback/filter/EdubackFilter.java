@@ -2,6 +2,8 @@ package com.orange.eduback.filter;
 
 import jakarta.servlet.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -9,6 +11,7 @@ import java.util.Date;
 
 
 @Slf4j
+@Component
 public class EdubackFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {

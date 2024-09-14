@@ -28,13 +28,22 @@ public class JwtUtils {
         byte[] decodedKey = Base64.getDecoder().decode(secret);
         this.key = Keys.hmacShaKeyFor(decodedKey);
     }
-
+/**
     public String generateToken(String username,String id,String role) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("id",id)
                 .claim("username",username)
                 .claim("role",role)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+    }
+**/
+    public String generateToken(String username) {
+        return Jwts.builder()
+                .claim("username",username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key, SignatureAlgorithm.HS512)

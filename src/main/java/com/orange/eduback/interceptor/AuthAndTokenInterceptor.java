@@ -41,13 +41,8 @@ public class AuthAndTokenInterceptor implements HandlerInterceptor {
         // 2. 如果携带token，解析token，获取用户信息
         try {
             Claims claims = jwtUtils.getClaimsFromToken(token);
-            //String username = jwtUtils.getUsernameFromToken(token);
             String username = claims.get("username", String.class);
-            String role = claims.get("role", String.class);
-            String id = claims.get("id", String.class);
             request.setAttribute("username", username);
-            request.setAttribute("role", role);
-            request.setAttribute("id", id);
             return true;
         } catch (Exception e) {
             log.error("token解析失败", e);
@@ -60,14 +55,11 @@ public class AuthAndTokenInterceptor implements HandlerInterceptor {
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         log.info("----interceptor请求postHandle处理：{}", request.getRequestURI());
         String username = (String) request.getAttribute("username");
-        String role = (String) request.getAttribute("role");
-        String id = (String) request.getAttribute("id");
         String ip = request.getRemoteAddr();
         String time = SimpleDateFormat.getInstance().format(System.currentTimeMillis());
         String browser = request.getHeader("User-Agent");
         String httpMethod = request.getMethod();
-        log.info("用户：{}，ID：{}, 角色：{},IP：{}，时间：{}，浏览器：{}，请求方式：{}", username, id, role, ip, time, browser, httpMethod);
-
+        log.info("用户：{}，IP：{}，时间：{}，浏览器：{}，请求方式：{}", username, ip, time, browser, httpMethod);
         HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
     }
 

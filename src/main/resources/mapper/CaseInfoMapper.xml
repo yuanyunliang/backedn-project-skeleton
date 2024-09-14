@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.orange.eduback.mapper.CaseInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.orange.eduback.domain.CaseInfo">
+            <result property="id" column="id" jdbcType="BIGINT"/>
+            <result property="caseName" column="case_name" jdbcType="VARCHAR"/>
+            <result property="caseDesc" column="case_desc" jdbcType="VARCHAR"/>
+            <result property="caseType" column="case_type" jdbcType="VARCHAR"/>
+            <result property="caseContent" column="case_content" jdbcType="VARCHAR"/>
+            <result property="casePrice" column="case_price" jdbcType="DECIMAL"/>
+            <result property="author" column="author" jdbcType="VARCHAR"/>
+            <result property="watchCount" column="watch_count" jdbcType="INTEGER"/>
+            <result property="likeCount" column="like_count" jdbcType="INTEGER"/>
+            <result property="favCount" column="fav_count" jdbcType="INTEGER"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,case_name,case_desc,
+        case_type,case_content,case_price,
+        author,watch_count,like_count,
+        fav_count,created_at,update_at,
+        case_cover
+    </sql>
+    <select id="findCasesByType" resultType="com.orange.eduback.domain.CaseInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from case_info
+        where case_type = #{caseType,jdbcType=VARCHAR}
+    </select>
+</mapper>

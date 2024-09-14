@@ -2,17 +2,23 @@ package com.orange.eduback.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.orange.eduback.common.PlainResult;
+import com.orange.eduback.domain.User;
+import com.orange.eduback.dto.LoginResponseDto;
 import com.orange.eduback.dto.UserInfoDto;
 import com.orange.eduback.service.UserService;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
     @Resource
     private UserService userService;
 
@@ -34,6 +40,15 @@ public class UserController {
     public PlainResult<String> updateUser(@PathVariable Long id, @RequestBody UserInfoDto userInfoDto) {
         userService.updateUser(id, userInfoDto);
         return PlainResult.success("success");
+    }
+
+    //更新用户角色
+    @PostMapping("/updateRole")
+    public PlainResult<LoginResponseDto> updateRole(@RequestBody Map<String,String> reqMap) {
+        String username = reqMap.get("username");
+        String role = reqMap.get("role");
+        log.info("update role by username:{},role: {}",username,role);
+        return PlainResult.success(userService.updateRole(username,role));
     }
 
     @DeleteMapping("/delete/{id}")

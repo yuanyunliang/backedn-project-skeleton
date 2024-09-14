@@ -1,7 +1,12 @@
 package com.orange.eduback.service;
 
 import com.orange.eduback.domain.Course;
+import com.orange.eduback.dto.CourseDto;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.orange.eduback.dto.CourseResponseDto;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
 * @author admin
@@ -10,4 +15,13 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface CourseService extends IService<Course> {
 
+    void uploadCourse(CourseDto courseDto);
+
+    CourseResponseDto uploadCourseCover(MultipartFile file);
+
+    CourseResponseDto uploadCourseVideo(MultipartFile file);
+
+    Course getCourseById(String id);
+
+    List<Course> getAllCourses(String type);
 }
