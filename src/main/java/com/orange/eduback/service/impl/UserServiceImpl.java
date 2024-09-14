@@ -1,19 +1,21 @@
 package com.orange.eduback.service.impl;
 
+import org.slf4j.Logger;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.orange.eduback.common.EduBaseException;
+import com.orange.eduback.domain.MailCode;
 import com.orange.eduback.domain.User;
-import com.orange.eduback.dto.LoginDto;
-import com.orange.eduback.dto.LoginResponseDto;
-import com.orange.eduback.dto.RegisterDto;
-import com.orange.eduback.dto.UserInfoDto;
+import com.orange.eduback.dto.*;
 import com.orange.eduback.mapper.UserMapper;
 import com.orange.eduback.service.UserService;
-import com.orange.eduback.util.EncryptUtils;
-import com.orange.eduback.util.JwtUtils;
+import com.orange.eduback.util.*;
 import jakarta.annotation.Resource;
+import me.zhyd.oauth.model.AuthUser;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +28,10 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private JwtUtils jwtUtils;
+
+    @Resource
+    private JavaMailSender mailSender;
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public UserInfoDto getUserByUsername(String username) {
@@ -40,7 +46,10 @@ public class UserServiceImpl implements UserService {
     public void register(RegisterDto registerDto) {
         User originUser = userMapper.findOneByUsername(registerDto.getUsername());
         if(originUser!=null){
-            throw new EduBaseException(400,"用户名已存在！");
+            throw new EduBaseException(405,"用户名已存在！");
+        }
+        if(!UserCheckUitls.checkRegister(registerDto)){
+            throw new EduBaseException(406,"注册信息有误，请重新填写！");
         }
         User user = new User();
         user.setUserName(registerDto.getUsername());
@@ -54,19 +63,6 @@ public class UserServiceImpl implements UserService {
         userMapper.insert(user);
     }
 
-    /*/没有使用jwt
-    @Override
-    public LoginResponseDto login(LoginDto loginDto) {
-        User user = userMapper.findOneByUsername(loginDto.getUsername());
-        if(user==null){
-            return null;
-        }
-       // if(!user.getUserPassword().equals(loginDto.getPassword())){
-        if(!user.getUserPassword().equals(EncryptUtils.md5(loginDto.getPassword()))){
-            return null;
-        }
-        return toLoginResponseDto(user);
-    }*/
     //使用jwt
     public LoginResponseDto login(LoginDto loginDto) {
         User user = userMapper.findOneByUsername(loginDto.getUsername());
@@ -77,6 +73,11 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         return toLoginResponseDto(user);
+    }
+
+    //第三方登录
+    public String login(AuthUser authUser) {
+        return toJson(authUser);
     }
 
     @Override
@@ -128,23 +129,66 @@ public class UserServiceImpl implements UserService {
     public void deleteBatch(List<Long> ids) {
         userMapper.deleteBatchIds(ids);
     }
-    /*/没有使用jwt
-    private LoginResponseDto toLoginResponseDto(User user) {
-        String token = user.getId() + "-" + user.getUserName() + "-" + user.getUserRole();
-        LoginResponseDto loginResponseDto = new LoginResponseDto();
-        //loginResponseDto.setToken(token);
-        loginResponseDto.setUsername(user.getUserName());
-        //loginResponseDto.setRole(user.getUserRole());
-        return loginResponseDto;
-    }*/
+
+    @Override
+    public LoginResponseDto mailLogin(MailLoginDto loginDto) {
+        //校验邮箱及验证码
+        JedisUtils jedisUtils = JedisUtils.INSTANCE;
+        String mailcode = jedisUtils.get(loginDto.getMail());
+        if(mailcode==null){
+            throw new EduBaseException(407,"验证码已过期！");
+        }
+        if(!mailcode.equals(loginDto.getVerifyCode())){
+            throw new EduBaseException(407,"验证码错误！");
+        }
+        User user = userMapper.findOneByMail(loginDto.getMail());
+        if(user==null){
+            throw new EduBaseException(407,"用户不存在！");
+        }
+        return toLoginResponseDto(user);
+    }
+
+    @Override
+    public void mailCode(String mail) {
+        String mailcode = MailUtils.generateMailCode();
+        //发送邮件
+        MailUtils.sendMail(mailSender,mail,mailcode);
+        //保存到redis
+        JedisUtils jedisUtils = JedisUtils.INSTANCE;
+        jedisUtils.setnxex(mail,mailcode,300);
+        log.info("********redis中key为mail：{}的值为{}************", mail, jedisUtils.get(mail));
+    }
+
+    @Override
+    public LoginResponseDto updateRole(String username, String role) {
+        User user = userMapper.findOneByUsername(username);
+        if(user==null){
+            throw new EduBaseException(400,"用户不存在！");
+        }
+        user.setUserRole(role);
+        userMapper.updateById(user);
+        return toLoginResponseDto(user);
+    }
+
     //使用jwt
     private LoginResponseDto toLoginResponseDto(User user) {
-        String token = jwtUtils.generateToken(user.getUserName(),String.valueOf(user.getId()),user.getUserRole()); ;
+        //String token = jwtUtils.generateToken(user.getUserName(),String.valueOf(user.getId()),user.getUserRole()); ;
+        String token = jwtUtils.generateToken(user.getUserName());
         LoginResponseDto loginResponseDto = new LoginResponseDto();
         loginResponseDto.setToken(token);
         loginResponseDto.setUsername(user.getUserName());
         loginResponseDto.setRole(user.getUserRole());
         return loginResponseDto;
+    }
+
+    //第三方登录
+    private String toJson(AuthUser authUser) {
+        String token = jwtUtils.generateToken(authUser.getUsername());
+        ThirdPartyLoginResponseDto loginResponseDto = new ThirdPartyLoginResponseDto();
+        loginResponseDto.setToken(token);
+        loginResponseDto.setUsername(authUser.getUsername());
+        loginResponseDto.setAvatar(authUser.getAvatar());
+        return JSON.toJSONString(loginResponseDto);
     }
 
     private UserInfoDto toUerInfoDto(User user) {

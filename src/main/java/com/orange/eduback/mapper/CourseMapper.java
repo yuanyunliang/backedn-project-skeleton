@@ -3,6 +3,8 @@ package com.orange.eduback.mapper;
 import com.orange.eduback.domain.Course;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
+import java.util.List;
+
 /**
 * @author admin
 * @description 针对表【course】的数据库操作Mapper
@@ -11,6 +13,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface CourseMapper extends BaseMapper<Course> {
 
+    List<Course> findCoursesByType(String type);
 }
 
 

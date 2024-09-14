@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.orange.eduback.mapper.SolutionMapper">
+
+    <resultMap id="BaseResultMap" type="com.orange.eduback.domain.Solution">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="solutionName" column="solution_name" jdbcType="VARCHAR"/>
+            <result property="solutionDesc" column="solution_desc" jdbcType="VARCHAR"/>
+            <result property="solutionType" column="solution_type" jdbcType="VARCHAR"/>
+            <result property="solutionContent" column="solution_content" jdbcType="VARCHAR"/>
+            <result property="solutionPrice" column="solution_price" jdbcType="DECIMAL"/>
+            <result property="author" column="author" jdbcType="VARCHAR"/>
+            <result property="watchCount" column="watch_count" jdbcType="INTEGER"/>
+            <result property="likeCount" column="like_count" jdbcType="INTEGER"/>
+            <result property="favCount" column="fav_count" jdbcType="INTEGER"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updateAt" column="update_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,solution_name,solution_desc,
+        solution_type,solution_content,solution_price,
+        author,watch_count,like_count,
+        fav_count,created_at,update_at,
+        solution_cover
+    </sql>
+    <select id="findSolutionsByType" resultType="com.orange.eduback.domain.Solution">
+        select
+        <include refid="Base_Column_List"/>
+        from solution
+        where solution_type = #{solutionType,jdbcType=VARCHAR}
+    </select>
+</mapper>

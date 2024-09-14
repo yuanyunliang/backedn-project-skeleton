@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.orange.eduback.mapper.ArticleMapper">
+
+    <resultMap id="BaseResultMap" type="com.orange.eduback.domain.Article">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="courseName" column="course_name" jdbcType="VARCHAR"/>
+            <result property="courseDesc" column="course_desc" jdbcType="VARCHAR"/>
+            <result property="courseType" column="course_type" jdbcType="VARCHAR"/>
+            <result property="courseClass" column="course_class" jdbcType="VARCHAR"/>
+            <result property="coursePrice" column="course_price" jdbcType="DECIMAL"/>
+            <result property="courseContent" column="course_content" jdbcType="VARCHAR"/>
+            <result property="author" column="author" jdbcType="VARCHAR"/>
+            <result property="watchCount" column="watch_count" jdbcType="INTEGER"/>
+            <result property="likeCount" column="like_count" jdbcType="INTEGER"/>
+            <result property="favCount" column="fav_count" jdbcType="INTEGER"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,course_name,course_desc,
+        course_type,course_class,course_price,
+        course_content,author,watch_count,like_count,fav_count,created_at,updated_at,
+        course_cover
+    </sql>
+    <update id="updateArticle">
+        update article
+        <set>
+        <if test="courseName != null">
+            course_name = #{courseName,jdbcType=VARCHAR},
+        </if>
+        <if test="courseDesc != null">
+            course_desc = #{courseDesc,jdbcType=VARCHAR},
+        </if>
+        <if test="courseType != null">
+            course_type = #{courseType,jdbcType=VARCHAR},
+        </if>
+        <if test="courseClass != null">
+            course_class = #{courseClass,jdbcType=VARCHAR},
+        </if>
+        <if test="coursePrice != null">
+            course_price = #{coursePrice,jdbcType=DECIMAL},
+        </if>
+        <if test="courseContent != null">
+            course_content = #{courseContent,jdbcType=VARCHAR},
+        </if>
+        <if test="author != null">
+            author = #{author,jdbcType=VARCHAR},
+        </if>
+        <if test="watchCount != null">
+            watch_count = #{watchCount,jdbcType=INTEGER},
+        </if>
+        <if test="likeCount != null">
+            like_count = #{likeCount,jdbcType=INTEGER},
+        </if>
+        <if test="favCount != null">
+            fav_count = #{favCount,jdbcType=INTEGER},
+        </if>
+        <if test="createdAt != null">
+            created_at = #{createdAt,jdbcType=TIMESTAMP},
+        </if>
+        <if test="updatedAt != null">
+            updated_at = #{updatedAt,jdbcType=TIMESTAMP},
+        </if>
+        <if test="courseCover != null">
+            course_cover = #{courseCover,jdbcType=VARCHAR},
+        </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="findArticlesByType" resultType="com.orange.eduback.domain.Article">
+        select
+        <include refid="Base_Column_List"/>
+        from article
+        where
+        course_type = #{courseType,jdbcType=VARCHAR}
+    </select>
+</mapper>

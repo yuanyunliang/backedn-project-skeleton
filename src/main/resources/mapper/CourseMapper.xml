@@ -23,4 +23,11 @@
         course_url,course_status,created_at,
         updated_at
     </sql>
+    <select id="findCoursesByType" resultType="com.orange.eduback.domain.Course">
+        select
+        <include refid="Base_Column_List"/>
+        from course
+        where
+        course_type = #{courseType,jdbcType=VARCHAR}
+    </select>
 </mapper>
